@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-50;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-bleu-nuit;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-bleu-nuit hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-bleu-nuit;
+  }
+  
+  .btn-secondary {
+    @apply inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-bleu-nuit bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-bleu-nuit;
+  }
+  
+  .card {
+    @apply bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow;
+  }
+  
+  .input-field {
+    @apply w-full p-2 border border-gray-300 rounded-md shadow-sm focus:border-orange focus:ring focus:ring-orange focus:ring-opacity-50;
+  }
+  
+  .section-title {
+    @apply text-2xl font-bold text-bleu-nuit mb-4;
+  }
+}
+
+/* Appliquer les nouvelles couleurs aux éléments spécifiques */
+.bg-gradient-to-r {
+  @apply from-bleu-nuit to-blue-700;
+}
+
+.text-blue-600 {
+  @apply text-orange;
+}
+
+.bg-blue-600 {
+  @apply bg-bleu-nuit;
+}
+
+.bg-blue-700 {
+  @apply bg-bleu-nuit;
+}
+
+.hover\:bg-blue-700:hover {
+  @apply hover:bg-orange;
+}
+
+.border-blue-500 {
+  @apply border-orange;
+}
+
+.text-blue-500 {
+  @apply text-orange;
+}
+
+.text-yellow-500 {
+  @apply text-saumon;
+}
+
+.hover\:text-blue-800:hover {
+  @apply hover:text-orange;
+}
