@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 
 @Entity
-@DiscriminatorValue("ADMIN")
+@Table(name = "admins")
 public class Admin extends User {
 
     @Column(nullable = true)

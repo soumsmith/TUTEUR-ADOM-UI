@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import com.tuteurldom.dto.ParentDto;
 
 @Path("/api/auth")
 @Produces(MediaType.APPLICATION_JSON)
@@ -46,7 +47,7 @@ public class AuthResource {
         // Générer un token JWT (simplifié pour la demo)
         String token = "mock-jwt-token-" + user.id;
         
-        UserDto userDto = createUserDto(user);
+        Object userDto = createUserDto(user);  // ✅ CORRECTION: Changer de UserDto vers Object
         AuthResponse response = new AuthResponse(userDto, token);
         
         return Response.ok(response).build();
@@ -122,15 +123,47 @@ public class AuthResource {
         }
 
         String token = "mock-jwt-token-" + parent.id;
-        UserDto parentDto = new UserDto(parent);
+        ParentDto parentDto = new ParentDto(parent);
         AuthResponse response = new AuthResponse(parentDto, token);
 
         return Response.status(Response.Status.CREATED).entity(response).build();
     }
 
-    private UserDto createUserDto(User user) {
+    @POST
+    @Path("/register/admin")
+    @Transactional
+    public Response registerAdmin(@Valid RegisterAdminRequest request) {
+        // Vérifier que la demande vient d'un admin authentifié
+        // (Dans un vrai projet, on vérifierait le token JWT)
+        
+        if (userRepository.existsByEmail(request.email)) {
+            return Response.status(Response.Status.CONFLICT)
+                    .entity("Un utilisateur avec cet email existe déjà")
+                    .build();
+        }
+
+        Admin admin = new Admin(
+                request.email,
+                request.password,
+                request.firstName,
+                request.lastName,
+                request.position
+        );
+
+        admin.persist();
+
+        String token = "mock-jwt-token-" + admin.id;
+        UserDto adminDto = new UserDto(admin);
+        AuthResponse response = new AuthResponse(adminDto, token);
+
+        return Response.status(Response.Status.CREATED).entity(response).build();
+    }
+
+    private Object createUserDto(User user) {  // ✅ CORRECTION: Changer de UserDto vers Object
         if (user instanceof Teacher) {
             return new TeacherDto((Teacher) user);
+        } else if (user instanceof Parent) {
+            return new ParentDto((Parent) user);  // ✅ CORRECTION: Utiliser ParentDto pour les parents
         } else {
             return new UserDto(user);
         }
@@ -155,6 +188,14 @@ public class AuthResource {
         public String firstName;
         public String lastName;
         public List<ChildInfo> children;
+    }
+
+    public static class RegisterAdminRequest {
+        public String email;
+        public String password;
+        public String firstName;
+        public String lastName;
+        public String position;
     }
 
     public static class ChildInfo {

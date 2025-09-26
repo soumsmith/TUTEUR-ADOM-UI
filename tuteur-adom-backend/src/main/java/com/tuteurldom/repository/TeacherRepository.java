@@ -10,26 +10,6 @@ import java.util.List;
 @ApplicationScoped
 public class TeacherRepository implements PanacheRepository<Teacher> {
 
-    public List<Teacher> findByStatus(Teacher.TeacherStatus status) {
-        return list("status", status);
-    }
-
-    public List<Teacher> findActiveTeachers() {
-        return list("status", Teacher.TeacherStatus.ACTIVE);
-    }
-
-    public List<Teacher> findBySubject(String subject) {
-        return list("lower(subject) like lower(?1)", "%" + subject + "%");
-    }
-
-    public List<Teacher> findByHourlyRateRange(BigDecimal minRate, BigDecimal maxRate) {
-        return list("hourlyRate >= ?1 and hourlyRate <= ?2", minRate, maxRate);
-    }
-
-    public List<Teacher> findByLocation(Teacher.TeachingLocation location) {
-        return list("?1 member of teachingLocations", location);
-    }
-
     public List<Teacher> findWithFilters(String subject, BigDecimal minRate, BigDecimal maxRate, 
                                        Teacher.TeachingLocation location) {
         StringBuilder query = new StringBuilder("status = :status");
@@ -56,5 +36,9 @@ public class TeacherRepository implements PanacheRepository<Teacher> {
         }
 
         return list(query.toString(), params);
+    }
+
+    public List<Teacher> findByStatus(Teacher.TeacherStatus status) {
+        return list("status", status);
     }
 } 

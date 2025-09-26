@@ -28,6 +28,12 @@ public class CourseResource {
     @Inject
     TeacherRepository teacherRepository;
 
+    @GET
+    @Path("/health")
+    public Response healthCheck() {
+        return Response.ok("API Tuteur Adom - OK").build();
+    }
+
     @POST
     @Path("/teachers/{teacherId}/courses")
     @Transactional
@@ -78,7 +84,7 @@ public class CourseResource {
     }
 
     @GET
-    @Path("/teachers/{teacherId}/courses")
+    @Path("/courses/by-teacher/{teacherId}")
     public Response getCoursesByTeacher(@PathParam("teacherId") Long teacherId) {
         List<Course> courses = courseRepository.findByTeacherId(teacherId);
         List<CourseDto> courseDtos = courses.stream()
@@ -86,6 +92,22 @@ public class CourseResource {
                 .collect(Collectors.toList());
 
         return Response.ok(courseDtos).build();
+    }
+
+    @GET
+    @Path("/courses/{courseId}")
+    public Response getCourseById(@PathParam("courseId") Long courseId) {
+        Optional<Course> courseOpt = courseRepository.findByIdOptional(courseId);
+        
+        if (courseOpt.isEmpty()) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("Cours non trouvé")
+                    .build();
+        }
+
+        Course course = courseOpt.get();
+        CourseDto courseDto = new CourseDto(course);
+        return Response.ok(courseDto).build();
     }
 
     @PUT

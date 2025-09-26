@@ -8,8 +8,7 @@ import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 
 @Entity
 @Table(name = "users")
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "user_type", discriminatorType = DiscriminatorType.STRING)
+@Inheritance(strategy = InheritanceType.JOINED)
 public abstract class User extends PanacheEntityBase {
 
     @Id
@@ -36,7 +35,7 @@ public abstract class User extends PanacheEntityBase {
     @Column(name = "last_name", nullable = false)
     public String lastName;
 
-    @Column(name = "profile_picture")
+    @Column(name = "profile_picture", columnDefinition = "LONGTEXT")
     public String profilePicture;
 
     @Enumerated(EnumType.STRING)

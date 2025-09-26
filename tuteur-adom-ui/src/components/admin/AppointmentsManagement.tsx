@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import requestService from '../../services/requestService';
 import type { Appointment } from '../../types';
+import AdminAppointmentRow from './AdminAppointmentRow';
 
 const AppointmentsManagement = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -113,46 +114,14 @@ const AppointmentsManagement = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {appointments.map(appointment => (
-                <tr key={appointment.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{formatDate(appointment.date)}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      {appointment.startTime} - {appointment.endTime}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">ID: {appointment.parentId.slice(0, 8)}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">ID: {appointment.teacherId.slice(0, 8)}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{appointment.location}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {getStatusBadge(appointment.status)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    {appointment.status === 'scheduled' && (
-                      <>
-                        <button
-                          onClick={() => handleStatusUpdate(appointment.id, 'completed')}
-                          className="text-green-600 hover:text-green-900 mr-3"
-                        >
-                          Terminer
-                        </button>
-                        <button
-                          onClick={() => handleStatusUpdate(appointment.id, 'cancelled')}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          Annuler
-                        </button>
-                      </>
-                    )}
-                  </td>
-                </tr>
+                <AdminAppointmentRow
+                  key={appointment.id}
+                  appointment={appointment}
+                  formatDate={formatDate}
+                  getStatusBadge={getStatusBadge}
+                  onComplete={() => handleStatusUpdate(appointment.id, 'completed')}
+                  onCancel={() => handleStatusUpdate(appointment.id, 'cancelled')}
+                />
               ))}
             </tbody>
           </table>

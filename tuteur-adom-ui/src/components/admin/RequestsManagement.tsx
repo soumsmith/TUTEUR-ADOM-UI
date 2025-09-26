@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import requestService from '../../services/requestService';
 import type { Request } from '../../types';
+import AdminRequestRow from './AdminRequestRow';
 import AppointmentScheduler from '../appointments/AppointmentScheduler';
 
 const RequestsManagement = () => {
@@ -158,40 +159,14 @@ const RequestsManagement = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {requests.map(request => (
-                <tr key={request.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">#{request.id.slice(0, 8)}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">ID: {request.parentId.slice(0, 8)}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">ID: {request.teacherId.slice(0, 8)}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">ID: {request.courseId.slice(0, 8)}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500">{formatDate(request.createdAt)}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {getStatusBadge(request.status)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button
-                      onClick={() => handleRequestAction(request, 'approved')}
-                      className="text-green-600 hover:text-green-900 mr-3"
-                    >
-                      Approuver
-                    </button>
-                    <button
-                      onClick={() => handleRequestAction(request, 'rejected')}
-                      className="text-red-600 hover:text-red-900"
-                    >
-                      Refuser
-                    </button>
-                  </td>
-                </tr>
+                <AdminRequestRow
+                  key={request.id}
+                  request={request}
+                  formatDate={formatDate}
+                  getStatusBadge={getStatusBadge}
+                  onApprove={() => handleRequestAction(request, 'approved')}
+                  onReject={() => handleRequestAction(request, 'rejected')}
+                />
               ))}
             </tbody>
           </table>

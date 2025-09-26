@@ -11,11 +11,11 @@ export interface Teacher extends User {
   role: 'teacher';
   subject: string;
   hourlyRate: number;
-  teachingLocation: TeachingLocation[];
+  teachingLocations: TeachingLocation[];
   skills: string;
   bio: string;
   cv?: string; // URL du CV ou contenu
-  status?: 'pending' | 'active' | 'suspended';
+  status?: 'PENDING' | 'ACTIVE' | 'SUSPENDED';
   rating: number;
   reviews: Review[];
   profilePicture?: string;

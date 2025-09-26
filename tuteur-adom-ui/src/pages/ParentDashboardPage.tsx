@@ -3,7 +3,10 @@ import { useSelector } from 'react-redux';
 import { Navigate, Link } from 'react-router-dom';
 import type { RootState } from '../redux/store';
 import requestService from '../services/requestService';
-import type { Request, Appointment } from '../types';
+import type { Request, Appointment, Parent } from '../types';
+import EditParentForm from '../components/parents/EditParentForm';
+import ChildrenManagement from '../components/parents/ChildrenManagement';
+import RequestDetailsRow from '../components/parents/RequestDetailsRow';
 
 const ParentDashboardPage = () => {
   const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
@@ -12,6 +15,10 @@ const ParentDashboardPage = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showEditProfileForm, setShowEditProfileForm] = useState(false);
+  const [profileSuccess, setProfileSuccess] = useState<string | null>(null);
+  const [showChildrenManagement, setShowChildrenManagement] = useState(false);
+  const [currentUser, setCurrentUser] = useState(user);
   
   // Vérifier si l'utilisateur est authentifié et est un parent
   if (!isAuthenticated || !user || user.role !== 'parent') {
@@ -28,7 +35,7 @@ const ParentDashboardPage = () => {
           const requestsData = await requestService.getParentRequests(user.id);
           setRequests(requestsData);
         } else if (activeTab === 'appointments') {
-          const appointmentsData = await requestService.getAppointmentsByParent(user.id);
+          const appointmentsData = await requestService.getParentAppointments(user.id);
           setAppointments(appointmentsData);
         }
         
@@ -53,6 +60,28 @@ const ParentDashboardPage = () => {
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  const handleEditProfileSuccess = () => {
+    setShowEditProfileForm(false);
+    setProfileSuccess('Profil mis à jour avec succès !');
+    
+    // Effacer le message de succès après 3 secondes
+    setTimeout(() => setProfileSuccess(null), 3000);
+  };
+
+  const handleChildrenUpdate = (children: { id?: string; name: string; age: number; grade: string; }[]) => {
+    // Mettre à jour l'utilisateur local avec les nouvelles informations des enfants
+    const updatedUser = {
+      ...currentUser,
+      children: children.map(({ id, ...child }) => child) // Retirer l'id temporaire
+    } as Parent;
+    setCurrentUser(updatedUser);
+    setShowChildrenManagement(false);
+    setProfileSuccess('Informations des enfants mises à jour avec succès !');
+    
+    // Effacer le message de succès après 3 secondes
+    setTimeout(() => setProfileSuccess(null), 3000);
   };
 
   const getStatusBadge = (status: string) => {
@@ -172,23 +201,12 @@ const ParentDashboardPage = () => {
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
                           {requests.map(request => (
-                            <tr key={request.id} className="hover:bg-gray-50">
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-900">{formatDate(request.createdAt)}</div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-900">ID: {request.teacherId.slice(0, 8)}</div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-900">ID: {request.courseId.slice(0, 8)}</div>
-                              </td>
-                              <td className="px-6 py-4">
-                                <div className="text-sm text-gray-900">{request.message.slice(0, 50)}...</div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                {getStatusBadge(request.status)}
-                              </td>
-                            </tr>
+                            <RequestDetailsRow
+                              key={request.id}
+                              request={request}
+                              formatDate={formatDate}
+                              getStatusBadge={getStatusBadge}
+                            />
                           ))}
                         </tbody>
                       </table>
@@ -259,6 +277,11 @@ const ParentDashboardPage = () => {
               {/* Onglet Profil */}
               {activeTab === 'profile' && (
                 <div className="max-w-2xl mx-auto">
+                  {profileSuccess && (
+                    <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-md">
+                      {profileSuccess}
+                    </div>
+                  )}
                   <div className="mb-4 text-center">
                     <div className="inline-block h-24 w-24 rounded-full overflow-hidden bg-gray-100">
                       <div className="flex items-center justify-center h-full w-full bg-blue-500 text-white text-2xl font-bold">
@@ -275,10 +298,65 @@ const ParentDashboardPage = () => {
                     <h3 className="font-semibold mb-2">Informations du profil</h3>
                     
                     <div className="mt-4">
-                      <button className="btn-primary w-full md:w-auto">
+                      <button 
+                        onClick={() => setShowEditProfileForm(true)}
+                        className="btn-primary w-full md:w-auto mr-3"
+                      >
                         Modifier mon profil
                       </button>
+                      <button 
+                        onClick={() => setShowChildrenManagement(true)}
+                        className="btn-secondary w-full md:w-auto"
+                      >
+                        Gérer mes enfants
+                      </button>
                     </div>
+                  </div>
+
+                  {/* Section des enfants */}
+                  <div className="bg-gray-50 p-4 rounded-lg mb-6">
+                    <h3 className="font-semibold mb-4">Mes enfants</h3>
+                    
+                    {currentUser && (currentUser as Parent).children && (currentUser as Parent).children!.length > 0 ? (
+                      <div className="space-y-2">
+                        {(currentUser as Parent).children!.map((child: any, index: number) => (
+                          <div key={index} className="flex items-center justify-between p-3 bg-white rounded-lg">
+                            <div>
+                              <h4 className="font-medium">{child.name}</h4>
+                              <p className="text-sm text-gray-600">{child.age} ans - {child.grade}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 text-center py-4">Aucun enfant ajouté</p>
+                    )}
+                  </div>
+                </div>
+              )}
+              
+              {/* Formulaire de modification de profil */}
+              {showEditProfileForm && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                  <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                    <EditParentForm
+                      parent={user as Parent}
+                      onSuccess={handleEditProfileSuccess}
+                      onCancel={() => setShowEditProfileForm(false)}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Modale de gestion des enfants */}
+              {showChildrenManagement && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                  <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                    <ChildrenManagement
+                      parent={currentUser as Parent}
+                      onUpdate={handleChildrenUpdate}
+                      onCancel={() => setShowChildrenManagement(false)}
+                    />
                   </div>
                 </div>
               )}

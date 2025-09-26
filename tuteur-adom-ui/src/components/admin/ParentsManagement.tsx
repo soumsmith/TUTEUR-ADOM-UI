@@ -1,13 +1,9 @@
 import { useState, useEffect } from 'react';
-import type { User } from '../../types';
+import type { Parent as BaseParent } from '../../types';
+import parentService from '../../services/parentService';
 
-interface Parent extends User {
-  status: 'active' | 'blocked';
-  children?: {
-    name: string;
-    age: number;
-    grade: string;
-  }[];
+interface Parent extends BaseParent {
+  status?: 'active' | 'blocked';
 }
 
 // Données mockées pour les parents (à remplacer par une vraie API)
@@ -62,9 +58,31 @@ const ParentsManagement = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   useEffect(() => {
-    // Pour le moment, on utilise les données mockées
-    setParents(mockParents);
-    setLoading(false);
+    const fetchParents = async () => {
+      try {
+        setLoading(true);
+        const data = await parentService.getAllParents();
+        
+        // Ajouter le statut par défaut 'active' si pas présent
+        const parentsWithStatus = data.map(parent => ({
+          ...parent,
+          status: (parent as any).status || 'active' as const
+        }));
+        
+        setParents(parentsWithStatus);
+        setError(null);
+      } catch (err) {
+        console.error('Erreur lors du chargement des parents:', err);
+        setError('Erreur lors du chargement des parents');
+        
+        // Fallback vers les données mockées en cas d'erreur
+        setParents(mockParents);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchParents();
   }, []);
 
   const handleBlockParent = (parentId: string) => {

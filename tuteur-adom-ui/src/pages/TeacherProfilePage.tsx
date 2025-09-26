@@ -1,10 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import teacherService from '../services/teacherService';
-import requestService from '../services/requestService';
 import type { RootState } from '../redux/store';
+import teacherService from '../services/teacherService';
+import courseService from '../services/courseService';
+import requestService from '../services/requestService';
 import type { Teacher, Course, Review } from '../types';
+import { formatHourlyRate } from '../utils/currency';
+
+// Fonction pour générer une image d'avatar par défaut
+const getDefaultAvatar = (firstName: string, lastName: string) => {
+  const seed = `${firstName}-${lastName}`.toLowerCase();
+  return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
+};
 
 const TeacherProfilePage = () => {
   const { id } = useParams<{ id: string }>();
@@ -29,7 +37,7 @@ const TeacherProfilePage = () => {
         const teacherData = await teacherService.getTeacherById(id);
         setTeacher(teacherData);
         
-        const coursesData = await teacherService.getCoursesByTeacher(id);
+        const coursesData = await courseService.getCoursesByTeacher(id);
         setCourses(coursesData);
         
         setError(null);
@@ -117,9 +125,13 @@ const TeacherProfilePage = () => {
           <div className="flex flex-col md:flex-row items-center md:items-start">
             <div className="md:mr-6 mb-4 md:mb-0">
               <img
-                src={teacher.profilePicture || '/default-avatar.png'}
+                src={teacher.profilePicture || getDefaultAvatar(teacher.firstName, teacher.lastName)}
                 alt={`${teacher.firstName} ${teacher.lastName}`}
                 className="w-32 h-32 rounded-full object-cover border-4 border-white"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = getDefaultAvatar(teacher.firstName, teacher.lastName);
+                }}
               />
             </div>
             
@@ -131,11 +143,17 @@ const TeacherProfilePage = () => {
               <p className="text-xl mb-2">{teacher.subject}</p>
               
               <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-3">
-                {teacher.teachingLocation.map((location, index) => (
-                  <span key={index} className="px-3 py-1 bg-blue-700 rounded-full text-sm">
-                    {location}
+                {teacher.teachingLocations && teacher.teachingLocations.length > 0 ? (
+                  teacher.teachingLocations.map((location, index) => (
+                    <span key={index} className="px-3 py-1 bg-blue-700 rounded-full text-sm">
+                      {location}
+                    </span>
+                  ))
+                ) : (
+                  <span className="px-3 py-1 bg-gray-500 rounded-full text-sm">
+                    Lieux non spécifiés
                   </span>
-                ))}
+                )}
               </div>
               
               <div className="flex items-center justify-center md:justify-start mb-2">
@@ -149,7 +167,7 @@ const TeacherProfilePage = () => {
                 </span>
               </div>
               
-              <p className="font-bold text-xl">{teacher.hourlyRate} €/h</p>
+              <p className="font-bold text-xl">{formatHourlyRate(teacher.hourlyRate)}</p>
             </div>
           </div>
         </div>
@@ -193,7 +211,7 @@ const TeacherProfilePage = () => {
                 <section>
                   <h2 className="text-xl font-bold text-gray-800 mb-4">Avis des parents</h2>
                   <div className="space-y-4">
-                    {teacher.reviews.map((review: Review) => (
+                    {teacher.reviews && teacher.reviews.length > 0 ? teacher.reviews.map((review: Review) => (
                       <div key={review.id} className="border-b pb-4">
                         <div className="flex justify-between items-start mb-1">
                           <div className="flex items-center">
@@ -206,7 +224,9 @@ const TeacherProfilePage = () => {
                         </div>
                         <p className="text-gray-700">{review.comment}</p>
                       </div>
-                    ))}
+                    )) : (
+                      <p className="text-gray-500 text-center py-4">Aucun avis pour le moment</p>
+                    )}
                   </div>
                 </section>
               )}
@@ -225,7 +245,7 @@ const TeacherProfilePage = () => {
                         <h4 className="font-medium">{course.subject}</h4>
                         <p className="text-sm text-gray-600 mb-1">{course.description}</p>
                         <div className="flex justify-between items-center">
-                          <span className="font-bold">{course.hourlyRate} €/h</span>
+                          <span className="font-bold">{formatHourlyRate(course.hourlyRate)}</span>
                         </div>
                       </div>
                     ))}
@@ -264,7 +284,7 @@ const TeacherProfilePage = () => {
                           <option value="">Choisir un cours</option>
                           {courses.map(course => (
                             <option key={course.id} value={course.id}>
-                              {course.subject} - {course.hourlyRate} €/h
+                              {course.subject} - {formatHourlyRate(course.hourlyRate)}
                             </option>
                           ))}
                         </select>

@@ -1,3 +1,4 @@
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import type { RootState } from './redux/store';
@@ -6,44 +7,35 @@ import type { RootState } from './redux/store';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 
-// Pages publiques
+// Pages
 import HomePage from './pages/HomePage';
 import TeachersListPage from './pages/TeachersListPage';
 import TeacherProfilePage from './pages/TeacherProfilePage';
-
-// Pages d'authentification
 import LoginPage from './pages/LoginPage';
 import RegisterOptionsPage from './pages/RegisterOptionsPage';
 import TeacherRegisterPage from './pages/TeacherRegisterPage';
 import ParentRegisterPage from './pages/ParentRegisterPage';
-
-// Pages protégées
 import TeacherDashboardPage from './pages/TeacherDashboardPage';
 import ParentDashboardPage from './pages/ParentDashboardPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 
-// Route protégée qui vérifie l'authentification et le rôle
-const PrivateRoute = ({ children, roles }: { children: JSX.Element, roles: string[] }) => {
-  const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
+// Styles
+import './App.css';
+
+// Composant de route protégée
+const PrivateRoute = ({ children, roles }: { children: React.ReactNode; roles: string[] }) => {
+  const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
   
   if (!isAuthenticated) {
     return <Navigate to="/login" />;
   }
   
-  if (roles && roles.length > 0 && user && !roles.includes(user.role)) {
-    // Redirige vers une page appropriée en fonction du rôle
-    if (user.role === 'teacher') {
-      return <Navigate to="/teacher/dashboard" />;
-    } else if (user.role === 'parent') {
-      return <Navigate to="/parent/dashboard" />;
-    } else if (user.role === 'admin') {
-      return <Navigate to="/admin/dashboard" />;
-    } else {
-      return <Navigate to="/" />;
-    }
+  if (user && roles.includes(user.role)) {
+    return <>{children}</>;
   }
   
-  return children;
+  // Si l'utilisateur n'a pas le bon rôle, rediriger vers l'accueil
+  return <Navigate to="/" />;
 };
 
 function App() {

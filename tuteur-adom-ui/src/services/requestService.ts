@@ -17,155 +17,206 @@ interface CreateAppointmentData {
   location: TeachingLocation;
 }
 
-// Garder une copie en mémoire des demandes et rendez-vous
-let inMemoryRequests = [...mockRequests];
-let inMemoryAppointments = [...mockAppointments];
+// Fonction pour charger les demandes depuis le localStorage
+const loadRequestsFromStorage = (): Request[] => {
+  try {
+    const stored = localStorage.getItem('tuteur-adom-requests');
+    return stored ? JSON.parse(stored) : [...mockRequests];
+  } catch (error) {
+    console.error('Erreur lors du chargement des demandes depuis le localStorage:', error);
+    return [...mockRequests];
+  }
+};
+
+// Fonction pour sauvegarder les demandes dans le localStorage
+const saveRequestsToStorage = (requests: Request[]): void => {
+  try {
+    localStorage.setItem('tuteur-adom-requests', JSON.stringify(requests));
+  } catch (error) {
+    console.error('Erreur lors de la sauvegarde des demandes dans le localStorage:', error);
+  }
+};
+
+// Fonction pour charger les rendez-vous depuis le localStorage
+const loadAppointmentsFromStorage = (): Appointment[] => {
+  try {
+    const stored = localStorage.getItem('tuteur-adom-appointments');
+    return stored ? JSON.parse(stored) : [...mockAppointments];
+  } catch (error) {
+    console.error('Erreur lors du chargement des rendez-vous depuis le localStorage:', error);
+    return [...mockAppointments];
+  }
+};
+
+// Fonction pour sauvegarder les rendez-vous dans le localStorage
+const saveAppointmentsToStorage = (appointments: Appointment[]): void => {
+  try {
+    localStorage.setItem('tuteur-adom-appointments', JSON.stringify(appointments));
+  } catch (error) {
+    console.error('Erreur lors de la sauvegarde des rendez-vous dans le localStorage:', error);
+  }
+};
 
 const requestService = {
   createRequest: async (parentId: string, requestData: CreateRequestData): Promise<Request> => {
-    // Simuler un délai
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // Créer une nouvelle demande avec des données mockées
-    const newRequest: Request = {
-      id: `r${Date.now()}`,
-      parentId,
-      teacherId: requestData.teacherId,
-      courseId: requestData.courseId,
-      status: 'pending',
-      message: requestData.message,
-      createdAt: new Date().toISOString()
-    };
-
-    // Ajouter la nouvelle demande à la liste en mémoire
-    inMemoryRequests.push(newRequest);
-
-    return newRequest;
+    console.log('🔄 Création de demande via l\'API backend');
+    
+    // Validation des IDs avant envoi
+    const parentIdNum = parseInt(parentId);
+    const teacherIdNum = parseInt(requestData.teacherId);
+    const courseIdNum = parseInt(requestData.courseId);
+    
+    if (isNaN(parentIdNum) || isNaN(teacherIdNum) || isNaN(courseIdNum)) {
+      throw new Error(`IDs invalides: parentId=${parentId}, teacherId=${requestData.teacherId}, courseId=${requestData.courseId}`);
+    }
+    
+    console.log('📋 Données à envoyer:', {
+      parentId: parentIdNum,
+      teacherId: teacherIdNum,
+      courseId: courseIdNum,
+      message: requestData.message
+    });
+    
+    // Appeler l'API backend pour créer la demande
+    const response = await api.post('/api/requests', {
+      parentId: parentIdNum,
+      teacherId: teacherIdNum,
+      courseId: courseIdNum,
+      message: requestData.message
+    });
+    
+    console.log('✅ Demande créée dans la base de données:', response.data);
+    return response.data;
   },
 
   getParentRequests: async (parentId: string): Promise<Request[]> => {
-    // Simuler un délai
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // Filtrer les demandes en mémoire par parentId
-    return inMemoryRequests.filter(request => request.parentId === parentId);
+    console.log(`🔄 Chargement des demandes pour le parent ${parentId} depuis l'API backend`);
+    
+    // Appeler l'API backend pour récupérer les demandes du parent
+    const response = await api.get(`/api/requests/parent/${parentId}`);
+    console.log('✅ Demandes reçues du backend:', response.data);
+    
+    return response.data;
   },
 
   getRequestsByTeacher: async (teacherId: string): Promise<Request[]> => {
-    // Simuler un délai
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // Filtrer les demandes en mémoire par teacherId
-    return inMemoryRequests.filter(request => request.teacherId === teacherId);
+    console.log(`🔄 Chargement des demandes pour l'enseignant ${teacherId} depuis l'API backend`);
+    
+    // Appeler l'API backend pour récupérer les demandes de l'enseignant
+    const response = await api.get(`/api/requests/teacher/${teacherId}`);
+    console.log('✅ Demandes reçues du backend:', response.data);
+    
+    return response.data;
   },
 
   updateRequestStatus: async (requestId: string, status: 'approved' | 'rejected'): Promise<Request> => {
-    // Simuler un délai
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // Trouver la demande à mettre à jour
-    const requestIndex = inMemoryRequests.findIndex(request => request.id === requestId);
-    if (requestIndex === -1) {
-      throw new Error('Demande non trouvée');
+    console.log(`🔄 Mise à jour du statut de la demande ${requestId} vers '${status}' via l'API backend`);
+    
+    // Convertir requestId en number si nécessaire
+    const requestIdNum = parseInt(requestId);
+    if (isNaN(requestIdNum)) {
+      throw new Error(`ID de demande invalide: ${requestId}`);
     }
-
-    // Mettre à jour le statut
-    const updatedRequest = {
-      ...inMemoryRequests[requestIndex],
-      status
-    };
-
-    // Remplacer l'ancienne demande par la nouvelle
-    inMemoryRequests[requestIndex] = updatedRequest;
-
-    return updatedRequest;
+    
+    // Appeler l'API backend pour mettre à jour le statut
+    const response = await api.put(`/api/requests/${requestIdNum}/status`, {
+      status: status
+    });
+    
+    console.log('✅ Statut de demande mis à jour dans la base de données:', response.data);
+    return response.data;
   },
 
   getAllPendingRequests: async (): Promise<Request[]> => {
-    // Retourner toutes les demandes en attente
-    return Promise.resolve(inMemoryRequests.filter(request => request.status === 'pending'));
+    console.log('🔄 Chargement des demandes en attente depuis l\'API backend');
+    
+    // Appeler l'API backend pour récupérer les demandes en attente
+    const response = await api.get('/api/requests/pending');
+    console.log('✅ Demandes en attente reçues du backend:', response.data);
+    
+    return response.data;
   },
 
   // Services pour les rendez-vous
   createAppointment: async (appointmentData: CreateAppointmentData): Promise<Appointment> => {
-    // Simuler un délai
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // Trouver la demande associée
-    const request = inMemoryRequests.find(req => req.id === appointmentData.requestId);
-    if (!request) {
-      throw new Error('Demande non trouvée');
-    }
-
-    // Créer un nouveau rendez-vous avec des données mockées
-    const newAppointment: Appointment = {
-      id: `a${Date.now()}`,
+    console.log('🔄 Création de rendez-vous via l\'API backend');
+    console.log('📋 Données à envoyer:', appointmentData);
+    
+    // Appeler l'API backend pour créer le rendez-vous
+    const response = await api.post('/api/appointments', {
       requestId: appointmentData.requestId,
-      parentId: request.parentId,
-      teacherId: request.teacherId,
       date: appointmentData.date,
       startTime: appointmentData.startTime,
       endTime: appointmentData.endTime,
-      location: appointmentData.location,
-      status: 'scheduled'
-    };
-
-    // Ajouter le nouveau rendez-vous à la liste en mémoire
-    inMemoryAppointments.push(newAppointment);
-
-    return newAppointment;
+      location: appointmentData.location
+    });
+    
+    console.log('✅ Rendez-vous créé dans la base de données:', response.data);
+    return response.data;
   },
 
   getParentAppointments: async (parentId: string): Promise<Appointment[]> => {
-    // Simuler un délai
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // Filtrer les rendez-vous en mémoire par parentId
-    return inMemoryAppointments.filter(appointment => appointment.parentId === parentId);
+    console.log(`🔄 Chargement des rendez-vous pour le parent ${parentId} depuis l'API backend`);
+    
+    // Appeler l'API backend pour récupérer les rendez-vous du parent
+    const response = await api.get(`/api/appointments/parent/${parentId}`);
+    console.log('✅ Rendez-vous reçus du backend:', response.data);
+    
+    return response.data;
   },
 
   getAppointmentsByTeacher: async (teacherId: string): Promise<Appointment[]> => {
-    // Simuler un délai
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // Filtrer les rendez-vous en mémoire par teacherId
-    return inMemoryAppointments.filter(appointment => appointment.teacherId === teacherId);
+    console.log(`🔄 Chargement des rendez-vous pour l'enseignant ${teacherId} depuis l'API backend`);
+    
+    // Appeler l'API backend pour récupérer les rendez-vous de l'enseignant
+    const response = await api.get(`/api/appointments/teacher/${teacherId}`);
+    console.log('✅ Rendez-vous de l\'enseignant reçus du backend:', response.data);
+    
+    return response.data;
   },
 
   updateAppointmentStatus: async (appointmentId: string, status: 'completed' | 'cancelled'): Promise<Appointment> => {
-    // Simuler un délai
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // Trouver le rendez-vous à mettre à jour
-    const appointmentIndex = inMemoryAppointments.findIndex(appointment => appointment.id === appointmentId);
-    if (appointmentIndex === -1) {
-      throw new Error('Rendez-vous non trouvé');
+    console.log(`🔄 Mise à jour du statut du rendez-vous ${appointmentId} vers '${status}' via l'API backend`);
+    
+    // Convertir appointmentId en number si nécessaire
+    const appointmentIdNum = parseInt(appointmentId);
+    if (isNaN(appointmentIdNum)) {
+      throw new Error(`ID de rendez-vous invalide: ${appointmentId}`);
     }
-
-    // Mettre à jour le statut
-    const updatedAppointment = {
-      ...inMemoryAppointments[appointmentIndex],
-      status
-    };
-
-    // Remplacer l'ancien rendez-vous par le nouveau
-    inMemoryAppointments[appointmentIndex] = updatedAppointment;
-
-    return updatedAppointment;
+    
+    // Appeler l'API backend pour mettre à jour le statut
+    const response = await api.put(`/api/appointments/${appointmentIdNum}/status`, {
+      status: status.toUpperCase()
+    });
+    
+    console.log('✅ Statut de rendez-vous mis à jour dans la base de données:', response.data);
+    return response.data;
   },
 
   getAllRequests: async (): Promise<Request[]> => {
-    // Simuler un délai
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    return inMemoryRequests;
+    console.log('🔄 Chargement de toutes les demandes depuis l\'API backend');
+    
+    // Appeler l'API backend pour récupérer toutes les demandes
+    const response = await api.get('/api/requests');
+    console.log('✅ Toutes les demandes reçues du backend:', response.data);
+    
+    return response.data;
   },
 
   getAllAppointments: async (): Promise<Appointment[]> => {
-    // Simuler un délai
-    await new Promise(resolve => setTimeout(resolve, 500));
+    console.log('🔄 Chargement de tous les rendez-vous depuis l\'API backend');
+    
+    // Appeler l'API backend pour récupérer tous les rendez-vous
+    const response = await api.get('/api/appointments');
+    console.log('✅ Tous les rendez-vous reçus du backend:', response.data);
+    
+    return response.data;
+  },
 
-    return inMemoryAppointments;
+  // Méthode pour réinitialiser les données (utile pour les tests)
+  resetData: (): void => {
+    localStorage.removeItem('tuteur-adom-requests');
+    localStorage.removeItem('tuteur-adom-appointments');
   }
 };
 

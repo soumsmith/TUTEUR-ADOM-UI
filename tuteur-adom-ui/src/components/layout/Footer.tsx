@@ -68,8 +68,8 @@ const Footer = () => {
             <h3 className="text-md font-semibold mb-4">Contact</h3>
             <address className="text-sm text-gray-300 not-italic">
               <p>Email: contact@tuteur-adom.fr</p>
-              <p>Téléphone: 01 23 45 67 89</p>
-              <p>Adresse: 123 Rue de l'Éducation, 75000 Paris</p>
+              <p>Téléphone:07 13 33 55 54</p>
+              <p>Yopougon Maroc Anodor Abidjan</p>
             </address>
           </div>
         </div>

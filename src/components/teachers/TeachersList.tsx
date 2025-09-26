@@ -319,17 +319,7 @@ const TeachersList = () => {
         </div>
       )}
       
-      {/* Debug info */}
-      <div className="mt-8 p-4 bg-gray-100 text-xs text-left rounded">
-        <h4 className="font-bold mb-2">Informations de débogage:</h4>
-        <pre>{JSON.stringify({ 
-          loading, 
-          error, 
-          teachersCount: teachers.length, 
-          filteredCount: filteredTeachers.length,
-          mockDataImported: typeof teacherService.getAllTeachers === 'function'
-        }, null, 2)}</pre>
-      </div>
+     
     </div>
   );
 };

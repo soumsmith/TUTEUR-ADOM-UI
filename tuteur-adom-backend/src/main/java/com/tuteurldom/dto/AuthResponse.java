@@ -2,12 +2,12 @@ package com.tuteurldom.dto;
 
 public class AuthResponse {
     
-    public UserDto user;
+    public Object user;
     public String token;
     
     public AuthResponse() {}
     
-    public AuthResponse(UserDto user, String token) {
+    public AuthResponse(Object user, String token) {
         this.user = user;
         this.token = token;
     }

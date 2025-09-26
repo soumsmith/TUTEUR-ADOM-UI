@@ -7,6 +7,10 @@ import courseService from '../services/courseService';
 import teacherService from '../services/teacherService';
 import type { Request, Course, Appointment, Teacher } from '../types';
 import AddCourseForm from '../components/courses/AddCourseForm';
+import EditCourseForm from '../components/courses/EditCourseForm';
+import EditProfileForm from '../components/teachers/EditProfileForm';
+import { useAdminDetails } from '../hooks/useAdminDetails';
+import { formatHourlyRate } from '../utils/currency';
 
 const TeacherDashboardPage = () => {
   const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
@@ -17,12 +21,34 @@ const TeacherDashboardPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAddCourseForm, setShowAddCourseForm] = useState(false);
+  const [showEditProfileForm, setShowEditProfileForm] = useState(false);
   const [uploadingCV, setUploadingCV] = useState(false);
+  const [currentUser, setCurrentUser] = useState(user);
+  const [cvSuccess, setCvSuccess] = useState<string | null>(null);
+  const [profileSuccess, setProfileSuccess] = useState<string | null>(null);
+  const [editingCourse, setEditingCourse] = useState<Course | null>(null);
+  const [showEditCourseForm, setShowEditCourseForm] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
+  const [showRequestDetailsModal, setShowRequestDetailsModal] = useState(false);
   
   // Vérifier si l'utilisateur est authentifié et est un enseignant
   if (!isAuthenticated || !user || user.role !== 'teacher') {
     return <Navigate to="/login" />;
   }
+
+  // Recharger les données utilisateur complètes au chargement du dashboard
+  useEffect(() => {
+    const loadUserProfile = async () => {
+      try {
+        const updatedTeacher = await teacherService.getTeacherById(user.id);
+        setCurrentUser(updatedTeacher);
+      } catch (err) {
+        console.error('Erreur lors du rechargement du profil utilisateur:', err);
+      }
+    };
+
+    loadUserProfile();
+  }, [user.id]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,8 +63,14 @@ const TeacherDashboardPage = () => {
           const appointmentsData = await requestService.getAppointmentsByTeacher(user.id);
           setAppointments(appointmentsData);
         } else if (activeTab === 'courses') {
-          const coursesData = await courseService.getCoursesByTeacher(user.id);
-          setCourses(coursesData);
+          try {
+            const coursesData = await courseService.getCoursesByTeacher(user.id);
+            setCourses(coursesData);
+          } catch (courseError) {
+            console.warn('API courses non disponible, affichage message approprié:', courseError);
+            setCourses([]); // Tableau vide au lieu d'erreur
+            setError(null); // Pas d'erreur globale
+          }
         }
       } catch (err) {
         setError('Une erreur est survenue lors du chargement des données');
@@ -57,8 +89,10 @@ const TeacherDashboardPage = () => {
       setCourses(updatedCourses);
       setShowAddCourseForm(false);
     } catch (err) {
-      setError('Une erreur est survenue lors de la mise à jour des cours');
-      console.error(err);
+      console.warn('Impossible de recharger les cours depuis l\'API:', err);
+      // Fermer le formulaire même si le rechargement échoue
+      setShowAddCourseForm(false);
+      // Ne pas afficher d'erreur bloquante
     }
   };
 
@@ -114,11 +148,15 @@ const TeacherDashboardPage = () => {
       setError(null);
       
       const cvUrl = await teacherService.uploadCV(user.id, file);
-      await teacherService.updateTeacherProfile(user.id, { cv: cvUrl });
       
-      // Mettre à jour l'état local
-      // Note: Dans une application réelle, nous rechargerions les données de l'utilisateur depuis le serveur
-      window.location.reload();
+      // Mettre à jour l'utilisateur local avec le nouveau CV
+      const updatedUser = { ...user, cv: cvUrl };
+      setCurrentUser(updatedUser);
+      setCvSuccess('CV téléchargé avec succès !');
+      setError(null);
+      
+      // Effacer le message de succès après 3 secondes
+      setTimeout(() => setCvSuccess(null), 3000);
     } catch (err) {
       setError('Erreur lors du téléchargement du CV. Veuillez réessayer.');
       console.error(err);
@@ -134,13 +172,274 @@ const TeacherDashboardPage = () => {
       setError(null);
       await teacherService.updateTeacherProfile(user.id, { cv: undefined });
       
-      // Mettre à jour l'état local
-      // Note: Dans une application réelle, nous rechargerions les données de l'utilisateur depuis le serveur
-      window.location.reload();
+      // Mettre à jour l'utilisateur local
+      const updatedUser = { ...user, cv: undefined };
+      setCurrentUser(updatedUser);
+      setCvSuccess('CV supprimé avec succès !');
+      setError(null);
+      
+      // Effacer le message de succès après 3 secondes
+      setTimeout(() => setCvSuccess(null), 3000);
     } catch (err) {
       setError('Erreur lors de la suppression du CV. Veuillez réessayer.');
       console.error(err);
     }
+  };
+
+  const handleEditProfileSuccess = () => {
+    setShowEditProfileForm(false);
+    setProfileSuccess('Profil mis à jour avec succès !');
+    
+    // Recharger les données utilisateur
+    const reloadUserData = async () => {
+      try {
+        const updatedTeacher = await teacherService.getTeacherById(user.id);
+        setCurrentUser(updatedTeacher);
+      } catch (err) {
+        console.error('Erreur lors du rechargement des données:', err);
+      }
+    };
+    
+    reloadUserData();
+    
+    // Effacer le message de succès après 3 secondes
+    setTimeout(() => setProfileSuccess(null), 3000);
+  };
+
+  const handleEditCourse = (course: Course) => {
+    setEditingCourse(course);
+    setShowEditCourseForm(true);
+  };
+
+  const handleDeleteCourse = async (courseId: string) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce cours ?')) return;
+
+    try {
+      setError(null);
+      await courseService.deleteCourse(courseId);
+      
+      // Recharger la liste des cours
+      const coursesData = await courseService.getCoursesByTeacher(user.id);
+      setCourses(coursesData);
+      
+      // Afficher un message de succès temporaire
+      const tempSuccess = document.createElement('div');
+      tempSuccess.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg z-50';
+      tempSuccess.textContent = 'Cours supprimé avec succès !';
+      document.body.appendChild(tempSuccess);
+      setTimeout(() => {
+        document.body.removeChild(tempSuccess);
+      }, 3000);
+      
+    } catch (err) {
+      setError('Erreur lors de la suppression du cours. Veuillez réessayer.');
+      console.error(err);
+    }
+  };
+
+  const handleEditCourseSuccess = () => {
+    setShowEditCourseForm(false);
+    setEditingCourse(null);
+    
+    // Recharger la liste des cours
+    const reloadCourses = async () => {
+      try {
+        const coursesData = await courseService.getCoursesByTeacher(user.id);
+        setCourses(coursesData);
+      } catch (err) {
+        console.error('Erreur lors du rechargement des cours:', err);
+      }
+    };
+    
+    reloadCourses();
+    
+    // Afficher un message de succès temporaire
+    const tempSuccess = document.createElement('div');
+    tempSuccess.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg z-50';
+    tempSuccess.textContent = 'Cours modifié avec succès !';
+    document.body.appendChild(tempSuccess);
+    setTimeout(() => {
+      document.body.removeChild(tempSuccess);
+    }, 3000);
+  };
+
+  const handleShowRequestDetails = (request: Request) => {
+    setSelectedRequest(request);
+    setShowRequestDetailsModal(true);
+  };
+
+  const handleCloseRequestDetails = () => {
+    setSelectedRequest(null);
+    setShowRequestDetailsModal(false);
+  };
+
+  // Composant pour la modal de détails avec les vraies informations
+  const RequestDetailsModal = ({ request, onClose }: { request: Request; onClose: () => void }) => {
+    const { parent, teacher, course, loading } = useAdminDetails(request.parentId, request.teacherId, request.courseId);
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="p-6">
+            <h3 className="text-xl font-bold mb-4">Détails de la demande</h3>
+            
+            <div className="space-y-3">
+              <p><strong>ID de la demande:</strong> #{request.id.slice(0, 8)}</p>
+              
+              <div>
+                <strong>Parent:</strong> {loading ? (
+                  <span className="text-gray-500 ml-2">Chargement...</span>
+                ) : parent ? (
+                  <span className="ml-2">{parent.firstName} {parent.lastName} ({parent.email})</span>
+                ) : (
+                  <span className="text-red-500 ml-2">Parent non trouvé</span>
+                )}
+              </div>
+
+              <div>
+                <strong>Enseignant:</strong> {loading ? (
+                  <span className="text-gray-500 ml-2">Chargement...</span>
+                ) : teacher ? (
+                  <span className="ml-2">{teacher.firstName} {teacher.lastName} - {teacher.subject}</span>
+                ) : (
+                  <span className="text-red-500 ml-2">Enseignant non trouvé</span>
+                )}
+              </div>
+
+              <div>
+                <strong>Cours demandé:</strong> {loading ? (
+                  <span className="text-gray-500 ml-2">Chargement...</span>
+                ) : course ? (
+                  <div className="ml-2">
+                    <div>{course.subject}</div>
+                    <div className="text-sm text-gray-600">{course.description}</div>
+                    <div className="text-sm font-medium">{course.hourlyRate} FCFA/h</div>
+                  </div>
+                ) : (
+                  <span className="text-red-500 ml-2">Cours non trouvé</span>
+                )}
+              </div>
+
+              <div>
+                <strong>Message:</strong>
+                <div className="mt-1 p-3 bg-gray-50 rounded-md">
+                  {request.message}
+                </div>
+              </div>
+
+              <p><strong>Date de création:</strong> {new Date(request.createdAt).toLocaleDateString('fr-FR')}</p>
+              
+              <div>
+                <strong>Statut:</strong> 
+                <span className={`ml-2 px-2 py-1 rounded-full text-sm ${
+                  request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                  request.status === 'approved' ? 'bg-green-100 text-green-800' :
+                  'bg-red-100 text-red-800'
+                }`}>
+                  {request.status === 'pending' ? 'En attente' : 
+                   request.status === 'approved' ? 'Approuvée' : 'Rejetée'}
+                </span>
+              </div>
+            </div>
+
+            {request.status === 'pending' && (
+              <div className="mt-6 flex space-x-3">
+                <button 
+                  onClick={() => {
+                    // TODO: Implement logic to approve the request
+                    console.log('Approve request:', request.id);
+                    onClose();
+                  }}
+                  className="btn-primary"
+                >
+                  Approuver
+                </button>
+                <button 
+                  onClick={() => {
+                    // TODO: Implement logic to reject the request
+                    console.log('Reject request:', request.id);
+                    onClose();
+                  }}
+                  className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
+                >
+                  Rejeter
+                </button>
+              </div>
+            )}
+            
+            <button 
+              onClick={onClose}
+              className="mt-4 btn-secondary"
+            >
+              Fermer
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Composant pour une ligne de demande avec les vraies informations
+  const RequestRow = ({ request }: { request: Request }) => {
+    const { parent, teacher, course, loading } = useAdminDetails(request.parentId, request.teacherId, request.courseId);
+
+    return (
+      <tr key={request.id}>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+          #{request.id.slice(0, 8)}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+          {loading ? (
+            <span className="text-gray-500">Chargement...</span>
+          ) : parent ? (
+            <div>
+              <div className="font-medium">{parent.firstName} {parent.lastName}</div>
+              <div className="text-gray-500">{parent.email}</div>
+            </div>
+          ) : (
+            <span className="text-red-500">Parent non trouvé</span>
+          )}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+          {loading ? (
+            <span className="text-gray-500">Chargement...</span>
+          ) : course ? (
+            <div>
+              <div className="font-medium">{course.subject}</div>
+              <div className="text-gray-500">{course.hourlyRate} FCFA/h</div>
+            </div>
+          ) : (
+            <span className="text-red-500">Cours non trouvé</span>
+          )}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+          <div className="max-w-xs truncate">
+            {request.message}
+          </div>
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+          {new Date(request.createdAt).toLocaleDateString('fr-FR')}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap">
+          <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+            request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+            request.status === 'approved' ? 'bg-green-100 text-green-800' :
+            'bg-red-100 text-red-800'
+          }`}>
+            {request.status === 'pending' ? 'En attente' : 
+             request.status === 'approved' ? 'Approuvée' : 'Rejetée'}
+          </span>
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+          <button 
+            onClick={() => handleShowRequestDetails(request)}
+            className="text-blue-600 hover:text-blue-900"
+          >
+            Voir détails
+          </button>
+        </td>
+      </tr>
+    );
   };
 
   return (
@@ -205,6 +504,18 @@ const TeacherDashboardPage = () => {
             </div>
           )}
           
+          {cvSuccess && (
+            <div className="p-4 mb-6 bg-green-100 text-green-700 rounded-md">
+              {cvSuccess}
+            </div>
+          )}
+          
+          {profileSuccess && (
+            <div className="p-4 mb-6 bg-green-100 text-green-700 rounded-md">
+              {profileSuccess}
+            </div>
+          )}
+          
           {loading ? (
             <div className="flex justify-center p-12">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -227,7 +538,13 @@ const TeacherDashboardPage = () => {
                         <thead className="bg-gray-50">
                           <tr>
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              ID
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                               Parent
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Cours
                             </th>
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                               Message
@@ -245,33 +562,7 @@ const TeacherDashboardPage = () => {
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
                           {requests.map(request => (
-                            <tr key={request.id}>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-900">ID: {request.parentId.slice(0, 8)}</div>
-                              </td>
-                              <td className="px-6 py-4">
-                                <div className="text-sm text-gray-900">{request.message}</div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-900">{new Date(request.createdAt).toLocaleDateString()}</div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                  request.status === 'pending'
-                                    ? 'bg-yellow-100 text-yellow-800'
-                                    : request.status === 'approved'
-                                    ? 'bg-green-100 text-green-800'
-                                    : 'bg-red-100 text-red-800'
-                                }`}>
-                                  {request.status === 'pending' ? 'En attente' : request.status === 'approved' ? 'Approuvée' : 'Rejetée'}
-                                </span>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <button className="text-blue-600 hover:text-blue-900">
-                                  Voir détails
-                                </button>
-                              </td>
-                            </tr>
+                            <RequestRow key={request.id} request={request} />
                           ))}
                         </tbody>
                       </table>
@@ -353,9 +644,19 @@ const TeacherDashboardPage = () => {
                   <div className="flex justify-end mb-4">
                     <button
                       onClick={() => setShowAddCourseForm(true)}
-                      className="btn-primary"
+                      className="btn-primary mr-2"
                     >
                       Ajouter un cours
+                    </button>
+                    <button
+                      onClick={() => {
+                        const storedCourses = localStorage.getItem('tuteur-adom-courses');
+                        console.log('Cours stockés:', JSON.parse(storedCourses || '[]'));
+                        alert(`Nombre de cours: ${courses.length}\nDétails dans la console (F12)`);
+                      }}
+                      className="btn-secondary"
+                    >
+                      Debug
                     </button>
                   </div>
                   
@@ -375,16 +676,45 @@ const TeacherDashboardPage = () => {
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {courses.map(course => (
-                        <div key={course.id} className="bg-gray-50 p-4 rounded-lg">
-                          <h3 className="font-semibold text-lg mb-2">{course.subject}</h3>
-                          <p className="text-gray-700 mb-3">{course.description}</p>
-                          <div className="flex justify-between items-center">
-                            <span className="font-bold">{course.hourlyRate} €/h</span>
+                        <div key={course.id} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                          <h3 className="font-semibold text-lg mb-2 text-gray-900">{course.subject}</h3>
+                          <p className="text-gray-700 mb-3 text-sm leading-relaxed">{course.description}</p>
+                          
+                          {/* Lieux d'enseignement */}
+                          <div className="mb-3">
+                            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Lieux d'enseignement :</span>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {course.locations?.map((location, index) => (
+                                <span 
+                                  key={index}
+                                  className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                                >
+                                  {location}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Date de création */}
+                          <div className="mb-3">
+                            <span className="text-xs text-gray-500">
+                              Créé le {new Date(course.createdAt).toLocaleDateString('fr-FR')}
+                            </span>
+                          </div>
+
+                          <div className="flex justify-between items-center pt-2 border-t border-gray-200">
+                            <span className="font-bold text-lg text-green-600">{formatHourlyRate(course.hourlyRate)}</span>
                             <div className="space-x-2">
-                              <button className="text-blue-600 hover:text-blue-800">
+                              <button 
+                                onClick={() => handleEditCourse(course)}
+                                className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                              >
                                 Modifier
                               </button>
-                              <button className="text-red-600 hover:text-red-800">
+                              <button 
+                                onClick={() => handleDeleteCourse(course.id)}
+                                className="text-red-600 hover:text-red-800 text-sm font-medium"
+                              >
                                 Supprimer
                               </button>
                             </div>
@@ -402,21 +732,21 @@ const TeacherDashboardPage = () => {
                   <div className="mb-4 text-center">
                     <div className="inline-block h-24 w-24 rounded-full overflow-hidden bg-gray-100">
                       <div className="flex items-center justify-center h-full w-full bg-blue-500 text-white text-2xl font-bold">
-                        {user.firstName.charAt(0)}{user.lastName.charAt(0)}
+                        {currentUser?.firstName.charAt(0)}{currentUser?.lastName.charAt(0)}
                       </div>
                     </div>
                     <h2 className="mt-4 text-xl font-bold">
-                      {user.firstName} {user.lastName}
+                      {currentUser?.firstName} {currentUser?.lastName}
                     </h2>
-                    <p className="text-gray-600">{user.email}</p>
+                    <p className="text-gray-600">{currentUser?.email}</p>
                   </div>
                   
                   <div className="bg-gray-50 p-6 rounded-lg mb-6">
                     <h3 className="font-semibold mb-4">CV</h3>
-                    {(user as Teacher).cv ? (
+                    {(currentUser as Teacher)?.cv ? (
                       <div className="flex items-center justify-between">
                         <a
-                          href={(user as Teacher).cv}
+                          href={(currentUser as Teacher).cv}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center text-blue-600 hover:text-blue-800"
@@ -443,13 +773,20 @@ const TeacherDashboardPage = () => {
                           type="file"
                           accept=".pdf"
                           onChange={handleCVUpload}
+                          disabled={uploadingCV}
                           className="block w-full text-sm text-gray-500
                             file:mr-4 file:py-2 file:px-4
                             file:rounded-full file:border-0
                             file:text-sm file:font-semibold
                             file:bg-blue-50 file:text-blue-700
-                            hover:file:bg-blue-100"
+                            hover:file:bg-blue-100
+                            disabled:opacity-50 disabled:cursor-not-allowed"
                         />
+                        {uploadingCV && (
+                          <div className="mt-2 text-sm text-blue-600">
+                            Téléchargement en cours...
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -458,12 +795,52 @@ const TeacherDashboardPage = () => {
                     <h3 className="font-semibold mb-4">Informations du profil</h3>
                     
                     <div className="mt-4">
-                      <button className="btn-primary w-full md:w-auto">
+                      <button 
+                        onClick={() => setShowEditProfileForm(true)}
+                        className="btn-primary w-full md:w-auto"
+                      >
                         Modifier mon profil
                       </button>
                     </div>
                   </div>
                 </div>
+              )}
+              
+              {/* Formulaire de modification de profil */}
+              {showEditProfileForm && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                  <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                    <EditProfileForm
+                      teacher={currentUser as Teacher}
+                      onSuccess={handleEditProfileSuccess}
+                      onCancel={() => setShowEditProfileForm(false)}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Formulaire de modification de cours */}
+              {showEditCourseForm && editingCourse && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                  <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                    <EditCourseForm
+                      course={editingCourse}
+                      onSuccess={handleEditCourseSuccess}
+                      onCancel={() => {
+                        setShowEditCourseForm(false);
+                        setEditingCourse(null);
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Modal de détails de la demande */}
+              {showRequestDetailsModal && selectedRequest && (
+                <RequestDetailsModal
+                  request={selectedRequest}
+                  onClose={handleCloseRequestDetails}
+                />
               )}
             </>
           )}

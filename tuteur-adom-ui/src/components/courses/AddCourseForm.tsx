@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { TeachingLocation } from '../../types';
 import courseService from '../../services/courseService';
+import { CURRENCY } from '../../utils/currency';
 
 interface AddCourseFormProps {
   teacherId: string;
@@ -126,7 +127,7 @@ const AddCourseForm = ({ teacherId, onSuccess, onCancel }: AddCourseFormProps) =
         
         <div>
           <label htmlFor="hourlyRate" className="block text-gray-700 text-sm font-medium mb-2">
-            Tarif horaire (€)
+            Tarif horaire ({CURRENCY.SYMBOL})
           </label>
           <input
             type="number"

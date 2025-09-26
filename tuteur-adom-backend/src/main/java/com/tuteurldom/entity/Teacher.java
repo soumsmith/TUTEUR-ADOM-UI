@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@DiscriminatorValue("TEACHER")
+@Table(name = "teachers")
 public class Teacher extends User {
 
     @NotBlank
@@ -53,6 +53,8 @@ public class Teacher extends User {
     public Teacher() {
         super();
         this.role = UserRole.TEACHER;
+        this.status = TeacherStatus.PENDING;
+        this.rating = BigDecimal.ZERO;
     }
 
     public Teacher(String email, String password, String firstName, String lastName,
@@ -64,6 +66,8 @@ public class Teacher extends User {
         this.teachingLocations = teachingLocations != null ? teachingLocations : new ArrayList<>();
         this.skills = skills;
         this.bio = bio;
+        this.status = TeacherStatus.PENDING;
+        this.rating = BigDecimal.ZERO;
     }
 
     // Enum pour les lieux d'enseignement

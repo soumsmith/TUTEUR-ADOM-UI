@@ -1,19 +1,32 @@
+import React from 'react';
 import { Link } from 'react-router-dom';
 import type { Teacher } from '../../types';
+import { formatHourlyRate } from '../../utils/currency';
+
+// Fonction pour générer une image d'avatar par défaut
+const getDefaultAvatar = (firstName: string, lastName: string) => {
+  const seed = `${firstName}-${lastName}`.toLowerCase();
+  return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
+};
 
 interface TeacherCardProps {
   teacher: Teacher;
 }
 
-const TeacherCard = ({ teacher }: TeacherCardProps) => {
+const TeacherCard: React.FC<TeacherCardProps> = ({ teacher }) => {
   return (
-    <div className="card hover:shadow-lg transition-shadow">
-      <div className="flex items-start">
-        <div className="mr-4">
+    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+      <div className="p-4">
+        <div className="flex items-center mb-3">
           <img
-            src={teacher.profilePicture || '/default-avatar.png'}
+            src={teacher.profilePicture || getDefaultAvatar(teacher.firstName, teacher.lastName)}
             alt={`${teacher.firstName} ${teacher.lastName}`}
-            className="w-20 h-20 rounded-full object-cover"
+            className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
+            onError={(e) => {
+              // En cas d'erreur de chargement, utiliser l'avatar par défaut
+              const target = e.target as HTMLImageElement;
+              target.src = getDefaultAvatar(teacher.firstName, teacher.lastName);
+            }}
           />
         </div>
         
@@ -36,18 +49,24 @@ const TeacherCard = ({ teacher }: TeacherCardProps) => {
           </div>
           
           <div className="flex flex-wrap gap-1 mb-2">
-            {teacher.teachingLocation.map((location, index) => (
-              <span 
-                key={index} 
-                className="inline-block px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded"
-              >
-                {location}
+            {teacher.teachingLocations && teacher.teachingLocations.length > 0 ? (
+              teacher.teachingLocations.map((location, index) => (
+                <span 
+                  key={index} 
+                  className="inline-block px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded"
+                >
+                  {location}
+                </span>
+              ))
+            ) : (
+              <span className="inline-block px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded">
+                Non spécifié
               </span>
-            ))}
+            )}
           </div>
           
           <div className="flex justify-between items-center">
-            <span className="font-bold text-gray-900">{teacher.hourlyRate} €/h</span>
+            <span className="font-bold text-gray-900">{formatHourlyRate(teacher.hourlyRate)}</span>
             <Link 
               to={`/teachers/${teacher.id}`} 
               className="btn-primary text-sm py-1"

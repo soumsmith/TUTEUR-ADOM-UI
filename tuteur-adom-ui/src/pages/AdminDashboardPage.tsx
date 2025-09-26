@@ -1,20 +1,64 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Navigate } from 'react-router-dom';
 import RequestsManagement from '../components/admin/RequestsManagement';
 import AppointmentsManagement from '../components/admin/AppointmentsManagement';
 import TeachersManagement from '../components/admin/TeachersManagement';
 import ParentsManagement from '../components/admin/ParentsManagement';
+import api from '../services/api';
 import type { RootState } from '../redux/store';
+
+interface Stats {
+  teachers: {
+    active: number;
+    pending: number;
+    suspended: number;
+    total: number;
+  };
+  parents: {
+    total: number;
+  };
+  requests: {
+    pending: number;
+    approved: number;
+    rejected: number;
+    total: number;
+  };
+  appointments: {
+    scheduled: number;
+    completed: number;
+    cancelled: number;
+    total: number;
+  };
+}
 
 const AdminDashboardPage = () => {
   const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
   const [activeTab, setActiveTab] = useState('requests');
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [loadingStats, setLoadingStats] = useState(true);
   
   // Vérifier si l'utilisateur est authentifié et est un administrateur
   if (!isAuthenticated || !user || user.role !== 'admin') {
     return <Navigate to="/login" />;
   }
+
+  useEffect(() => {
+    const loadStats = async () => {
+      try {
+        console.log('📊 Chargement des statistiques...');
+        const response = await api.get('/api/admin/stats');
+        console.log('📊 Statistiques reçues:', response.data);
+        setStats(response.data);
+      } catch (error) {
+        console.error('❌ Erreur lors du chargement des statistiques:', error);
+      } finally {
+        setLoadingStats(false);
+      }
+    };
+
+    loadStats();
+  }, []);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -79,24 +123,38 @@ const AdminDashboardPage = () => {
 
       <div className="mt-8">
         <h2 className="text-lg font-medium text-gray-900 mb-4">Statistiques</h2>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-blue-50 p-4 rounded-md">
-            <h3 className="text-sm font-medium text-blue-800 mb-1">Demandes en attente</h3>
-            <p className="text-2xl font-bold text-blue-600">12</p>
+        {loadingStats ? (
+          <div className="flex justify-center items-center h-20">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
           </div>
-          <div className="bg-green-50 p-4 rounded-md">
-            <h3 className="text-sm font-medium text-green-800 mb-1">Rendez-vous à venir</h3>
-            <p className="text-2xl font-bold text-green-600">18</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="bg-blue-50 p-4 rounded-md">
+              <h3 className="text-sm font-medium text-blue-800 mb-1">Demandes en attente</h3>
+              <p className="text-2xl font-bold text-blue-600">
+                {stats?.requests?.pending || 0}
+              </p>
+            </div>
+            <div className="bg-green-50 p-4 rounded-md">
+              <h3 className="text-sm font-medium text-green-800 mb-1">Rendez-vous à venir</h3>
+              <p className="text-2xl font-bold text-green-600">
+                {stats?.appointments?.scheduled || 0}
+              </p>
+            </div>
+            <div className="bg-yellow-50 p-4 rounded-md">
+              <h3 className="text-sm font-medium text-yellow-800 mb-1">Enseignants actifs</h3>
+              <p className="text-2xl font-bold text-yellow-600">
+                {stats?.teachers?.active || 0}
+              </p>
+            </div>
+            <div className="bg-purple-50 p-4 rounded-md">
+              <h3 className="text-sm font-medium text-purple-800 mb-1">Parents inscrits</h3>
+              <p className="text-2xl font-bold text-purple-600">
+                {stats?.parents?.total || 0}
+              </p>
+            </div>
           </div>
-          <div className="bg-yellow-50 p-4 rounded-md">
-            <h3 className="text-sm font-medium text-yellow-800 mb-1">Enseignants actifs</h3>
-            <p className="text-2xl font-bold text-yellow-600">34</p>
-          </div>
-          <div className="bg-purple-50 p-4 rounded-md">
-            <h3 className="text-sm font-medium text-purple-800 mb-1">Parents inscrits</h3>
-            <p className="text-2xl font-bold text-purple-600">67</p>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

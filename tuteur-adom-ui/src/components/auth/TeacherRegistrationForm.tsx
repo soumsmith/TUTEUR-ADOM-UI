@@ -285,7 +285,7 @@ const TeacherRegistrationForm = () => {
         
         <div>
           <label htmlFor="hourlyRate" className="block text-gray-700 text-sm font-medium mb-2">
-            Tarif horaire (€)
+            Tarif horaire (FCFA)
           </label>
           <input
             type="number"

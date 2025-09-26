@@ -11,7 +11,8 @@ export const mockAdmin: Admin = {
   position: 'Administrateur Principal'
 };
 
-export const mockTeachers: Teacher[] = [
+// Liste dynamique des enseignants (peut être modifiée pendant l'exécution)
+let dynamicTeachers: Teacher[] = [
   {
     id: '1',
     email: 'sophie.martin@example.com',
@@ -21,7 +22,7 @@ export const mockTeachers: Teacher[] = [
     profilePicture: 'https://randomuser.me/api/portraits/women/52.jpg',
     subject: 'Mathématiques',
     hourlyRate: 25,
-    teachingLocation: [TeachingLocation.ONLINE, TeachingLocation.HOME],
+    teachingLocations: [TeachingLocation.ONLINE, TeachingLocation.HOME],
     skills: 'Algèbre, Géométrie, Calcul différentiel, Préparation aux examens',
     bio: 'Enseignante expérimentée avec 10 ans d\'expérience dans l\'éducation. Spécialisée dans les mathématiques pour collège et lycée. Approche pédagogique adaptée à chaque élève.',
     cv: 'data:application/pdf;base64,JVBERi0xLjcKCjEgMCBvYmogICUgZW50cnkgcG9pbnQKPDwKICAvVHlwZSAvQ2F0YWxvZwogIC9QYWdlcyAyIDAgUgo+PgplbmRvYmoKCjIgMCBvYmoKPDwKICAvVHlwZSAvUGFnZXMKICAvTWVkaWFCb3ggWyAwIDAgMjAwIDIwMCBdCiAgL0NvdW50IDEKICAvS2lkcyBbIDMgMCBSIF0KPj4KZW5kb2JqCgozIDAgb2JqCjw8CiAgL1R5cGUgL1BhZ2UKICAvUGFyZW50IDIgMCBSCiAgL1Jlc291cmNlcyA8PAogICAgL0ZvbnQgPDwKICAgICAgL0YxIDQgMCBSIAogICAgPj4KICA+PgogIC9Db250ZW50cyA1IDAgUgo+PgplbmRvYmoKCjQgMCBvYmoKPDwKICAvVHlwZSAvRm9udAogIC9TdWJ0eXBlIC9UeXBlMQogIC9CYXNlRm9udCAvVGltZXMtUm9tYW4KPj4KZW5kb2JqCgo1IDAgb2JqICAlIHBhZ2UgY29udGVudAo8PAogIC9MZW5ndGggNDQKPj4Kc3RyZWFtCkJUCjcwIDUwIFRECi9GMSAxMiBUZgooSGVsbG8sIHdvcmxkISkgVGoKRVQKZW5kc3RyZWFtCmVuZG9iagoKeHJlZgowIDYKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDEwIDAwMDAwIG4gCjAwMDAwMDAwNzkgMDAwMDAgbiAKMDAwMDAwMDE3MyAwMDAwMCBuIAowMDAwMDAwMzAxIDAwMDAwIG4gCjAwMDAwMDAzODAgMDAwMDAgbiAKdHJhaWxlcgo8PAogIC9TaXplIDYKICAvUm9vdCAxIDAgUgo+PgpzdGFydHhyZWYKNDkyCiUlRU9G',
@@ -90,6 +91,27 @@ export const mockTeachers: Teacher[] = [
     ]
   }
 ];
+
+// Fonction pour ajouter un nouvel enseignant
+export const addTeacher = (teacher: Teacher) => {
+  dynamicTeachers.push(teacher);
+};
+
+// Fonction pour obtenir tous les enseignants (incluant les nouveaux)
+export const getMockTeachers = (): Teacher[] => {
+  return [...dynamicTeachers];
+};
+
+// Fonction pour mettre à jour un enseignant
+export const updateTeacher = (teacherId: string, updates: Partial<Teacher>) => {
+  const index = dynamicTeachers.findIndex(t => t.id === teacherId);
+  if (index !== -1) {
+    dynamicTeachers[index] = { ...dynamicTeachers[index], ...updates };
+  }
+};
+
+// Export pour compatibilité avec l'ancien code
+export const mockTeachers = dynamicTeachers;
 
 export const mockRequests: Request[] = [
   {
