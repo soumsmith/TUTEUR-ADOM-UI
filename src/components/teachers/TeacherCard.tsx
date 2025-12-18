@@ -68,7 +68,7 @@ const TeacherCard = ({ teacher }: TeacherCardProps) => {
             {Array.isArray(teacher.teachingLocation) && teacher.teachingLocation.map((location, index) => (
               <span
                 key={index}
-                className="inline-block px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded"
+                className="inline-block px-2 py-1 text-xs bg-gray-100_ text-gray-700 rounded"
               >
                 {location}
               </span>

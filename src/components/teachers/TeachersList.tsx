@@ -265,14 +265,14 @@ const TeachersList = () => {
         <div className="flex space-x-2">
           <button
             onClick={() => setViewMode('grid')}
-            className={`p-2 rounded ${viewMode === 'grid' ? 'bg-blue-100 text-orange' : 'bg-gray-100'}`}
+            className={`p-2 rounded ${viewMode === 'grid' ? 'bg-blue-100 text-orange' : 'bg-gray-100_'}`}
             aria-label="Affichage en grille"
           >
             Grille
           </button>
           <button
             onClick={() => setViewMode('list')}
-            className={`p-2 rounded ${viewMode === 'list' ? 'bg-blue-100 text-orange' : 'bg-gray-100'}`}
+            className={`p-2 rounded ${viewMode === 'list' ? 'bg-blue-100 text-orange' : 'bg-gray-100_'}`}
             aria-label="Affichage en liste"
           >
             Liste
@@ -303,7 +303,7 @@ const TeachersList = () => {
           
           {/* Debug info */}
           {teachers.length > 0 && (
-            <div className="mt-4 p-2 bg-gray-100 text-xs text-gray-700 rounded">
+            <div className="mt-4 p-2 bg-gray-100_ text-xs text-gray-700 rounded">
               <p>Données disponibles mais filtrées. Essayez de réinitialiser les filtres.</p>
             </div>
           )}

@@ -173,8 +173,8 @@ const TeacherRegistrationForm = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Inscription Enseignant</h2>
+    <div className="p-6">
+      {/* <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Inscription Enseignant</h2> */}
       
       {error && (
         <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">

@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 // Base URL de l'API - suppression du /api pour éviter le double préfixe
-const API_URL = 'http://localhost:8484';
+//const API_URL = 'http://localhost:8484';
+const API_URL = 'http://46.105.52.105:8484';
 
 // Création d'une instance Axios avec des configurations par défaut
 const api = axios.create({
@@ -27,11 +28,11 @@ api.interceptors.request.use(
     // En production, ajouter le token d'authentification
     // TEMPORAIRE: désactiver l'auth pour les endpoints admin car le backend n'est pas encore configuré pour JWT
     const isAuthEndpoint = config.url?.includes('/auth/');
-    const isAdminOperation = config.url?.includes('/admin/') || 
-                            config.url?.match(/\/api\/teachers\/\d+\/status/) || // Opérations de mise à jour de statut
-                            (config.url?.match(/\/api\/teachers\/\d+$/) && config.method?.toUpperCase() === 'PUT') || // Mise à jour de profil
-                            (config.url?.match(/\/api\/teachers\/\d+$/) && config.method?.toUpperCase() === 'GET'); // Lecture de profil
-    
+    const isAdminOperation = config.url?.includes('/admin/') ||
+      config.url?.match(/\/api\/teachers\/\d+\/status/) || // Opérations de mise à jour de statut
+      (config.url?.match(/\/api\/teachers\/\d+$/) && config.method?.toUpperCase() === 'PUT') || // Mise à jour de profil
+      (config.url?.match(/\/api\/teachers\/\d+$/) && config.method?.toUpperCase() === 'GET'); // Lecture de profil
+
     // TEMPORAIRE: désactiver complètement l'auth pour tous les endpoints publics 
     // Le backend n'est pas encore configuré pour l'authentification JWT
     // Ne pas envoyer de token pour l'instant
@@ -41,7 +42,7 @@ api.interceptors.request.use(
     //     config.headers.Authorization = `Bearer ${token}`;
     //   }
     // }
-    
+
     console.log('🌐 Requête API:', {
       url: config.url,
       method: config.method,
@@ -50,7 +51,7 @@ api.interceptors.request.use(
       isAdminOperation,
       skipAuth: isAuthEndpoint || isAdminOperation
     });
-    
+
     return config;
   },
   (error) => {

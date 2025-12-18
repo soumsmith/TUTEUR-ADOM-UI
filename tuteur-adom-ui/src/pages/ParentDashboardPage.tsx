@@ -97,7 +97,7 @@ const ParentDashboardPage = () => {
       case 'completed':
         return <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Terminé</span>;
       case 'cancelled':
-        return <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs">Annulé</span>;
+        return <span className="px-2 py-1 bg-gray-100_ text-gray-800 rounded-full text-xs">Annulé</span>;
       default:
         return null;
     }
@@ -283,7 +283,7 @@ const ParentDashboardPage = () => {
                     </div>
                   )}
                   <div className="mb-4 text-center">
-                    <div className="inline-block h-24 w-24 rounded-full overflow-hidden bg-gray-100">
+                    <div className="inline-block h-24 w-24 rounded-full overflow-hidden bg-gray-100_">
                       <div className="flex items-center justify-center h-full w-full bg-blue-500 text-white text-2xl font-bold">
                         {user.firstName.charAt(0)}{user.lastName.charAt(0)}
                       </div>
