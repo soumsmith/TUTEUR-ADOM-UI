@@ -43,7 +43,7 @@ function App() {
     <Router>
       <div className="flex flex-col min-h-screen">
         <Header />
-        <main className="flex-grow bg-gray-100_ py-6">
+        <main className="flex-grow py-6">
           <Routes>
             {/* Routes publiques */}
             <Route path="/" element={<HomePage />} />

@@ -2,6 +2,8 @@ import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import TeacherRegistrationForm from '../components/auth/TeacherRegistrationForm';
+import PageHeader from '../components/common/PageHeader';
+import BackNavigation from '../components/common/BackNavigation';
 import type { RootState } from '../redux/store';
 import {
   GraduationCap,
@@ -41,42 +43,23 @@ const TeacherRegisterPage = () => {
   }, [isAuthenticated, user, navigate]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header Navigation */}
-      <div className="bg-white dark:bg-gray-800 dark:border-gray-700">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link 
-              to="/" 
-              className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              <span className="font-medium">Retour à l'accueil</span>
-            </Link>
-          </div>
-        </div>
-      </div>
+    <div className="max-w-7xl mx-auto px-4 min-h-screen ">
+      <BackNavigation />
 
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-7xl mx-auto">
-          {/* En-tête principal */}
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-600 rounded-2xl mb-6">
-              <GraduationCap className="w-10 h-10 text-white" />
-            </div>
-            <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-4">
-              Devenez enseignant
-              <span className="block text-blue-600 dark:text-blue-400 mt-2">Tuteur-Adom</span>
-            </h1>
-            <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto leading-relaxed">
-              Rejoignez notre communauté d'enseignants passionnés et partagez votre savoir avec des étudiants motivés
-            </p>
-          </div>
+          <PageHeader 
+            title="Devenez enseignant"
+            subtitle="Rejoignez notre communauté d'enseignants passionnés et partagez votre savoir avec des étudiants motivés"
+            brandName=""
+            // brandColor="blue"
+            // iconColor="blue"
+          />
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
             {/* Statistiques */}
             <div className="lg:col-span-1 order-2 lg:order-1">
-              <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 border-2 border-gray-200 dark:border-gray-700">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl p-8  dark:border-gray-700">
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-8">
                   Rejoignez une communauté dynamique
                 </h3>
@@ -147,17 +130,17 @@ const TeacherRegisterPage = () => {
 
             {/* Formulaire principal */}
             <div className="lg:col-span-2 order-1 lg:order-2">
-              <div className="bg-white dark:bg-gray-800 rounded-2xl border-2 border-gray-200 dark:border-gray-700 overflow-hidden">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl  dark:border-gray-700 overflow-hidden">
                 {/* En-tête formulaire */}
-                <div className="bg-blue-600 px-8 py-8">
+                <div className="bg-emerald-600 px-8 py-8">
                   <div className="flex items-center justify-between">
                     <div>
                       <h2 className="text-2xl font-bold text-white mb-2">Créez votre profil enseignant</h2>
                       <p className="text-blue-100">Complétez le formulaire pour commencer</p>
                     </div>
                     <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg">
-                      <Sparkles className="w-4 h-4 text-blue-600" />
-                      <span className="text-sm font-bold text-blue-600">Étape 1/2</span>
+                      <Sparkles className="w-4 h-4 text-emerald-600" />
+                      <span className="text-sm font-bold text-emerald-600">Étape 1/2</span>
                     </div>
                   </div>
                 </div>
@@ -181,7 +164,7 @@ const TeacherRegisterPage = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-8 border-2 border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 transition-all">
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-8  dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 transition-all">
                 <div className="inline-flex p-4 bg-blue-100 dark:bg-blue-900 rounded-xl mb-5">
                   <DollarSign className="w-7 h-7 text-blue-600 dark:text-blue-400" />
                 </div>
@@ -191,7 +174,7 @@ const TeacherRegisterPage = () => {
                 </p>
               </div>
 
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-8 border-2 border-gray-200 dark:border-gray-700 hover:border-emerald-500 dark:hover:border-emerald-500 transition-all">
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-8  dark:border-gray-700 hover:border-emerald-500 dark:hover:border-emerald-500 transition-all">
                 <div className="inline-flex p-4 bg-emerald-100 dark:bg-emerald-900 rounded-xl mb-5">
                   <Calendar className="w-7 h-7 text-emerald-600 dark:text-emerald-400" />
                 </div>
@@ -201,7 +184,7 @@ const TeacherRegisterPage = () => {
                 </p>
               </div>
 
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-8 border-2 border-gray-200 dark:border-gray-700 hover:border-amber-500 dark:hover:border-amber-500 transition-all">
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-8  dark:border-gray-700 hover:border-amber-500 dark:hover:border-amber-500 transition-all">
                 <div className="inline-flex p-4 bg-amber-100 dark:bg-amber-900 rounded-xl mb-5">
                   <Shield className="w-7 h-7 text-amber-600 dark:text-amber-400" />
                 </div>
@@ -211,7 +194,7 @@ const TeacherRegisterPage = () => {
                 </p>
               </div>
 
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-8 border-2 border-gray-200 dark:border-gray-700 hover:border-purple-500 dark:hover:border-purple-500 transition-all">
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-8  dark:border-gray-700 hover:border-purple-500 dark:hover:border-purple-500 transition-all">
                 <div className="inline-flex p-4 bg-purple-100 dark:bg-purple-900 rounded-xl mb-5">
                   <Target className="w-7 h-7 text-purple-600 dark:text-purple-400" />
                 </div>

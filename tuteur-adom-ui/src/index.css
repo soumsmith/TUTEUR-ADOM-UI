@@ -4,33 +4,33 @@
 
 @layer base {
   body {
-    @apply bg-gray-50;
+    @apply bg-gray-50 dark:bg-gray-900;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply text-bleu-nuit;
+    @apply text-bleu-nuit dark:text-blue-300;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-bleu-nuit hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-bleu-nuit;
+    @apply inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-bleu-nuit hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-bleu-nuit dark:bg-blue-600 dark:hover:bg-blue-700;
   }
   
   .btn-secondary {
-    @apply inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-bleu-nuit bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-bleu-nuit;
+    @apply inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-bleu-nuit bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-bleu-nuit dark:text-blue-300 dark:bg-gray-800 dark:hover:bg-gray-700 dark:border-gray-600;
   }
   
   .card {
-    @apply bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow;
+    @apply bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow;
   }
   
   .input-field {
-    @apply w-full p-2 border border-gray-300 rounded-md shadow-sm focus:border-orange focus:ring focus:ring-orange focus:ring-opacity-50;
+    @apply w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:border-orange focus:ring focus:ring-orange focus:ring-opacity-50 dark:bg-gray-700 dark:text-white;
   }
   
   .section-title {
-    @apply text-2xl font-bold text-bleu-nuit mb-4;
+    @apply text-2xl font-bold text-bleu-nuit dark:text-blue-300 mb-4;
   }
 }
 

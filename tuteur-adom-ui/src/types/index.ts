@@ -8,6 +8,12 @@ export interface User {
 }
 
 export interface Teacher extends User {
+  phone: string;
+  experience: string;
+  levels: never[];
+  cvUrl: string;
+  experienceYears: boolean;
+  totalReviews: any;
   role: 'teacher';
   subject: string;
   hourlyRate: number;
@@ -69,6 +75,7 @@ export interface Request {
 }
 
 export interface Appointment {
+  totalAmount: number;
   id: string;
   requestId: string;
   parentId: string;

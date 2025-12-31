@@ -36,18 +36,18 @@ const LoginForm = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white rounded-lg">
+    <div className="max-w-md mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg">
       {/* <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Connexion</h2> */}
       
       {error && (
-        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
+        <div className="mb-4 p-3 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded-md">
           {error}
         </div>
       )}
       
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
-          <label htmlFor="email" className="block text-gray-700 text-sm font-medium mb-2">
+          <label htmlFor="email" className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
             Email
           </label>
           <input
@@ -62,7 +62,7 @@ const LoginForm = () => {
         </div>
         
         <div className="mb-6">
-          <label htmlFor="password" className="block text-gray-700 text-sm font-medium mb-2">
+          <label htmlFor="password" className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
             Mot de passe
           </label>
           <input
@@ -87,10 +87,10 @@ const LoginForm = () => {
         </div>
       </form>
       
-      <div className="text-center text-gray-600">
+      <div className="text-center text-gray-600 dark:text-gray-400">
         <p>
           Vous n'avez pas de compte ?{' '}
-          <Link to="/register" className="text-blue-600 hover:text-blue-800">
+          <Link to="/register" className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
             S'inscrire
           </Link>
         </p>

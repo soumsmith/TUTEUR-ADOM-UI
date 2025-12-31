@@ -99,39 +99,39 @@ const ChildrenManagement = ({ parent, onUpdate, onCancel }: ChildrenManagementPr
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-xl font-bold text-gray-900 mb-6">Gestion des enfants</h2>
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+      <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Gestion des enfants</h2>
       
       {error && (
-        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
+        <div className="mb-4 p-3 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded-md">
           {error}
         </div>
       )}
 
       {/* Liste des enfants */}
       <div className="mb-6">
-        <h3 className="text-lg font-semibold mb-4">Mes enfants</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Mes enfants</h3>
         
         {children.length === 0 ? (
-          <p className="text-gray-500 text-center py-4">Aucun enfant ajouté</p>
+          <p className="text-gray-500 dark:text-gray-400 text-center py-4">Aucun enfant ajouté</p>
         ) : (
           <div className="space-y-3">
             {children.map((child) => (
-              <div key={child.id} className="flex items-center justify-between p-3 border rounded-lg">
+              <div key={child.id} className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
                 <div>
                   <h4 className="font-medium">{child.name}</h4>
-                  <p className="text-sm text-gray-600">{child.age} ans - {child.grade}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{child.age} ans - {child.grade}</p>
                 </div>
                 <div className="space-x-2">
                   <button
                     onClick={() => handleEditChild(child)}
-                    className="text-blue-600 hover:text-blue-800 text-sm"
+                    className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm"
                   >
                     Modifier
                   </button>
                   <button
                     onClick={() => handleDeleteChild(child.id!)}
-                    className="text-red-600 hover:text-red-800 text-sm"
+                    className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm"
                   >
                     Supprimer
                   </button>
@@ -154,14 +154,14 @@ const ChildrenManagement = ({ parent, onUpdate, onCancel }: ChildrenManagementPr
 
       {/* Formulaire d'ajout/modification */}
       {showAddForm && (
-        <div className="border-t pt-4">
-          <h3 className="text-lg font-semibold mb-4">
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             {editingChild ? 'Modifier l\'enfant' : 'Ajouter un enfant'}
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Nom complet
               </label>
               <input
@@ -174,7 +174,7 @@ const ChildrenManagement = ({ parent, onUpdate, onCancel }: ChildrenManagementPr
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Âge
               </label>
               <input
@@ -189,7 +189,7 @@ const ChildrenManagement = ({ parent, onUpdate, onCancel }: ChildrenManagementPr
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Classe
               </label>
               <input
@@ -220,7 +220,7 @@ const ChildrenManagement = ({ parent, onUpdate, onCancel }: ChildrenManagementPr
       )}
 
       {/* Boutons d'action */}
-      <div className="flex justify-end space-x-3 pt-6 border-t">
+      <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-700">
         <button
           onClick={onCancel}
           className="btn-secondary"

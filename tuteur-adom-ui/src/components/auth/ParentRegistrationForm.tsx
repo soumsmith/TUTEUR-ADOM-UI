@@ -150,11 +150,11 @@ const ParentRegistrationForm = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Inscription Parent</h2>
+    <div className="">
+      {/* <h2 className="text-2xl font-bold text-center text-gray-800 dark:text-white mb-6">Inscription Parent</h2> */}
       
       {error && (
-        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
+        <div className="mb-4 p-3 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded-md">
           {error}
         </div>
       )}
@@ -162,7 +162,7 @@ const ParentRegistrationForm = () => {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="firstName" className="block text-gray-700 text-sm font-medium mb-2">
+            <label htmlFor="firstName" className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
               Prénom
             </label>
             <input
@@ -178,7 +178,7 @@ const ParentRegistrationForm = () => {
           </div>
           
           <div>
-            <label htmlFor="lastName" className="block text-gray-700 text-sm font-medium mb-2">
+            <label htmlFor="lastName" className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
               Nom
             </label>
             <input
@@ -195,7 +195,7 @@ const ParentRegistrationForm = () => {
         </div>
         
         <div>
-          <label htmlFor="email" className="block text-gray-700 text-sm font-medium mb-2">
+          <label htmlFor="email" className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
             Email
           </label>
           <input
@@ -212,7 +212,7 @@ const ParentRegistrationForm = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="password" className="block text-gray-700 text-sm font-medium mb-2">
+            <label htmlFor="password" className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
               Mot de passe
             </label>
             <input
@@ -228,7 +228,7 @@ const ParentRegistrationForm = () => {
           </div>
           
           <div>
-            <label htmlFor="confirmPassword" className="block text-gray-700 text-sm font-medium mb-2">
+            <label htmlFor="confirmPassword" className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
               Confirmer le mot de passe
             </label>
             <input
@@ -245,23 +245,23 @@ const ParentRegistrationForm = () => {
         </div>
         
         <div className="mt-8 border-t pt-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Informations des enfants (optionnel)</h3>
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Informations des enfants (optionnel)</h3>
           
           {/* Liste des enfants ajoutés */}
           {children.length > 0 && (
             <div className="mb-4">
-              <h4 className="text-md font-medium text-gray-700 mb-2">Enfants ajoutés:</h4>
+              <h4 className="text-md font-medium text-gray-700 dark:text-gray-300 mb-2">Enfants ajoutés:</h4>
               <div className="space-y-2">
                 {children.map((child, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded">
                     <div>
                       <span className="font-medium">{child.name}</span>
-                      <span className="text-gray-500 ml-2">{child.age} ans, {child.grade}</span>
+                      <span className="text-gray-500 dark:text-gray-400 ml-2">{child.age} ans, {child.grade}</span>
                     </div>
                     <button
                       type="button"
                       onClick={() => removeChild(index)}
-                      className="text-red-500 hover:text-red-700"
+                      className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
                     >
                       Supprimer
                     </button>
@@ -272,13 +272,13 @@ const ParentRegistrationForm = () => {
           )}
           
           {/* Formulaire pour ajouter un enfant */}
-          <div className="bg-gray-50 p-4 rounded-md">
-            <h4 className="text-md font-medium text-gray-700 mb-3">Ajouter un enfant</h4>
+          <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-md">
+            <h4 className="text-md font-medium text-gray-700 dark:text-gray-300 mb-3">Ajouter un enfant</h4>
             {errors.child && <p className="text-red-500 text-xs mb-2">{errors.child}</p>}
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
               <div>
-                <label htmlFor="childName" className="block text-gray-700 text-sm font-medium mb-1">
+                <label htmlFor="childName" className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-1">
                   Nom de l'enfant
                 </label>
                 <input
@@ -293,7 +293,7 @@ const ParentRegistrationForm = () => {
               </div>
               
               <div>
-                <label htmlFor="childAge" className="block text-gray-700 text-sm font-medium mb-1">
+                <label htmlFor="childAge" className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-1">
                   Âge
                 </label>
                 <input
@@ -310,7 +310,7 @@ const ParentRegistrationForm = () => {
               </div>
               
               <div>
-                <label htmlFor="childGrade" className="block text-gray-700 text-sm font-medium mb-1">
+                <label htmlFor="childGrade" className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-1">
                   Niveau scolaire
                 </label>
                 <select
@@ -359,10 +359,10 @@ const ParentRegistrationForm = () => {
         </div>
       </form>
       
-      <div className="mt-6 text-center text-gray-600">
+      <div className="mt-6 text-center text-gray-600 dark:text-gray-400">
         <p>
           Vous avez déjà un compte ?{' '}
-          <Link to="/login" className="text-blue-600 hover:text-blue-800">
+          <Link to="/login" className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
             Se connecter
           </Link>
         </p>

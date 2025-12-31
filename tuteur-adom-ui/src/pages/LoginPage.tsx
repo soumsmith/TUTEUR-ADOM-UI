@@ -52,7 +52,7 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+    <div className="min-h-screen  dark:to-gray-800 flex items-center justify-center">
       <div className="max-w-7xl mx-auto px-4">
         {/* Carte unique */}
         <div className="bg-white dark:bg-gray-800 rounded-3xl  overflow-hidden">
@@ -124,7 +124,7 @@ const LoginPage = () => {
               </div>
 
               {/* Témoignage */}
-              <div className="bg-gray-100 dark:from-blue-900/20 dark:to-indigo-900/20 p-4 rounded-xl">
+              <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700">
                 <div className="flex items-start gap-3">
                   <div className="flex-shrink-0">
                     <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-orange-500 rounded-full flex items-center justify-center">
@@ -150,7 +150,7 @@ const LoginPage = () => {
             <div className="p-8 lg:p-12 order-1 lg:order-2">
               {/* En-tête formulaire */}
               <div className="text-center mb-8">
-                <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full mb-4">
+                <div className="inline-flex items-center justify-center w-14 h-14 bg-orange-500 rounded-full mb-4">
                   <LogIn className="w-6 h-6 text-white" />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
